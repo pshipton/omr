@@ -1251,13 +1251,15 @@ mainASynchSignalHandler(int signal, siginfo_t *sigInfo, void *contextInfo)
 			break;
 		}
 		if (sizeof(sigInfo->si_pid) == sizeof(uintptr_t)) {
-			if (0 == compareAndSwapUDATA((uintptr_t *)&signalPids[signal][tail], 0, sigInfo->si_pid)) {
+			uintptr_t pid = (NULL == sigInfo) ? 0 : (uintptr_t)sigInfo->si_pid;
+			if (0 == compareAndSwapUDATA((uintptr_t *)&signalPids[signal][tail], 0, pid)) {
 				/* The pid is written before the tail is incremented. */
 				signalPidTails[signal] = nextTail;
 				break;
 			}
 		} else {
-			if (0 == compareAndSwapU32((uint32_t *)&signalPids[signal][tail], 0, sigInfo->si_pid)) {
+			uint32_t pid = (NULL == sigInfo) ? 0 : (uint32_t)sigInfo->si_pid;
+			if (0 == compareAndSwapU32((uint32_t *)&signalPids[signal][tail], 0, pid)) {
 				/* The pid is written before the tail is incremented. */
 				signalPidTails[signal] = nextTail;
 				break;
